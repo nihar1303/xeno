@@ -1,0 +1,48 @@
+
+### 1. DEPENDENCIES & RUNTIME ARTIFACTS ###
+/node_modules
+/.pnp
+.pnp.*
+.yarn/
+/coverage
+/build
+/dist
+
+### 2. CONFIGURATION & SECRETS (CRUCIAL) ###
+# Environment variables (NEVER commit secrets!)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.production.local
+
+# Vercel deployment cache (contains local build cache)
+.vercel
+
+### 3. PRISMA AND DATABASE ###
+# The auto-generated Prisma Client (generated in node_modules)
+/node_modules/.prisma/client
+
+# Local database files if you were using SQLite (good safety measure)
+*.sqlite
+*.sqlite-journal
+
+### 4. TYPESCRIPT / COMPILATION ###
+*.tsbuildinfo
+next-env.d.ts
+
+### 5. NEXT.JS / REACT FRONTEND (CORRECT PATHS) ###
+# Exclusions specific to the frontend inside the 'dashboard' folder:
+
+# Next.js build output
+/dashboard/.next/
+/dashboard/out/
+
+# Dependency directory inside the frontend
+/dashboard/node_modules
+
+# Local cache and build files
+/dashboard/npm-debug.log*
+/dashboard/yarn-debug.log*
+/dashboard/.DS_Store

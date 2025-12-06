@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    
+    // --- Project Setup (Required for structure) ---
+    "rootDir": "./src",              // Source code is inside the 'src' folder
+    "outDir": "./dist",              // Compiled output goes here
+
+    // --- Environment & Module Settings (Crucial for Node/Prisma/ts-node) ---
+    "target": "ES2020",              // Compile to a recent ES version for modern Node
+    "module": "CommonJS",            // Standard module system for Node.js backend 
+    "moduleResolution": "node",      // Specifies how modules are resolved
+    "esModuleInterop": true,         // Allows CJS/ESM interop (needed for Express/dotenv)
+    "forceConsistentCasingInFileNames": true,
+    
+    // --- Type Definitions (Crucial for fixing the 'process' red line) ---
+    "types": ["node"],               // Tells TypeScript to load Node.js global definitions (like 'process')
+    "lib": ["ES2020"],               // Standard library features available
+    
+    // --- Strictness & Recommended Options ---
+    "strict": true,                  // Enables all strict type-checking options
+    "skipLibCheck": true,            // Speeds up compilation
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    
+    // --- Code Style & Cleanup ---
+    "noImplicitAny": true,
+    "noUnusedLocals": true,          // Helps keep your code clean
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+    
+    // Note: Removed 'jsx', 'isolatedModules', 'verbatimModuleSyntax', 
+    // and other frontend-specific settings as they are not needed for the backend service.
+  },
+  
+  // Only include files from the 'src' folder and the config files
+  "include": [
+    "src/**/*", 
+    "prisma/prisma.config.ts" // Ensure the config file is processed
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

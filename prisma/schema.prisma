@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"  // URL comes from prisma.config.js
+  url      = env("DATABASE_URL")
+}
+
+// --- Multi-Tenancy Core Model ---
+model Tenant {
+  // Primary Key and Unique Identifier for the tenant
+  id                 String   @id @default(uuid())
+  // The domain of the Shopify store (e.g., 'my-store.myshopify.com')
+  shopify_store_domain String   @unique
+  // The Admin API Access Token used for ingestion
+  shopify_access_token String
+  // Status of the onboarding process
+  onboarding_status    String   @default("SETUP_REQUIRED")
+  last_synced_at       DateTime?
+  created_at           DateTime @default(now())
+
+  // Relationships
+  Customers          Customer[]
+  Products           Product[]
+  Orders             Order[]
+  Events             Event[]
+  Users              User[]  // <--- ADD THIS LINE: Explicitly defines the reverse relationship
+
+  @@map("tenants")
+}
+
+// --- Shopify Data Models ---
+
+model Customer {
+  id                  String    @id @default(uuid())
+  tenant_id           String
+  shopify_customer_id BigInt
+  email               String?
+  first_name          String?
+  last_name           String?
+  total_spent         Decimal   @default(0.0) @db.Decimal(10, 2)
+  created_at_shopify  DateTime?
+  updated_at_service  DateTime  @updatedAt
+
+  tenant Tenant  @relation(fields: [tenant_id], references: [id])
+  Orders Order[]
+
+  // Multi-Tenant Unique Constraint
+  @@unique([tenant_id, shopify_customer_id])
+  @@index([tenant_id])
+  @@map("customers")
+}
+
+model Order {
+  id                 String    @id @default(uuid())
+  tenant_id          String
+  customer_id        String? // nullable for guest orders
+  shopify_order_id   BigInt
+  order_date         DateTime
+  total_price        Decimal   @db.Decimal(10, 2)
+  status             String
+  created_at_shopify DateTime?
+  updated_at_service DateTime  @updatedAt
+
+  tenant   Tenant   @relation(fields: [tenant_id], references: [id])
+  customer Customer? @relation(fields: [customer_id], references: [id])
+
+  @@unique([tenant_id, shopify_order_id])
+  @@index([tenant_id])
+  @@map("orders")
+}
+
+model Product {
+  id                 String    @id @default(uuid())
+  tenant_id          String
+  shopify_product_id BigInt
+  title              String
+  vendor             String?
+  price              Decimal   @db.Decimal(10, 2)
+  created_at_shopify DateTime?
+  updated_at_service DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenant_id], references: [id])
+
+  @@unique([tenant_id, shopify_product_id])
+  @@index([tenant_id])
+  @@map("products")
+}
+
+model Event {
+  id        String   @id @default(uuid())
+  tenant_id String
+  event_type String
+  payload   Json
+  created_at DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenant_id], references: [id])
+
+  @@index([tenant_id])
+  @@map("events")
+}
+
+// User Model for email authentication (Scope 3)
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Stored as hashed value
+  tenant_id String   // Links the user to their store
+
+  // Relationships
+  tenant    Tenant   @relation(fields: [tenant_id], references: [id])
+
+  @@map("users")
+}
